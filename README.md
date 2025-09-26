@@ -4,7 +4,7 @@ Compute 3D density maps (percent occupancy) of selected atoms/molecules from mol
 Aligns to a reference selection, bins atoms onto a regular grid, and exports OpenDX (.dx) for visualization (e.g., VMD), plus an aligned GROMACS .gro frame for overlays.
 
 Example density map from the (very short) example trajectory in example/
-![alt text](https://github.com/mriopedre/volmap/example/example.png)
+![alt text](https://github.com/mriopedre/volmap/tree/main/example/example.png)
 
 # How to use
 Requires MDAnalysis, tqdm and numpy
