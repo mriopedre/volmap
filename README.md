@@ -32,6 +32,7 @@ density_estimator.calculate_and_save_density(
 )
 ```
 
+# Using the output
 The output can be read with vmd.
 ```bash
 vmd example/aligned_frame.gro example/density.dx
