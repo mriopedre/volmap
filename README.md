@@ -6,6 +6,8 @@ Aligns to a reference selection, bins atoms onto a regular grid, and exports Ope
 Example density map from the (very short) example trajectory in example/
 ![alt text](https://github.com/mriopedre/volmap/tree/main/example/example.png)
 
+![Example density map](example/example.png)
+
 # How to use
 Requires MDAnalysis, tqdm and numpy
 
