@@ -84,12 +84,19 @@ class Density3D():
             ligand = self.u.select_atoms(ligand)
 
         nx, ny, nz = self.grid.shape
+        origin = np.array([self.x[0], self.y[0], self.z[0]], dtype=float)
 
         for ts in tqdm(self.u.trajectory):
+            # box lengths (assumes orthorhombic; angles ~ 90°)
+            Lx, Ly, Lz = ts.dimensions[:3]
+            L = np.array([Lx, Ly, Lz], dtype=float)
+
             # Get the positions of the ligand atoms
-            positions = ligand.positions
+            pos = ligand.positions
+            pos_wrapped = np.mod(pos - origin, L) + origin  # wrap positions into the box
+
             # Determine which grid cells the ligand atoms fall into
-            indices = np.floor((positions - (self.x[0], self.y[0], self.z[0])) / grid_size).astype(int)
+            indices = np.floor((pos_wrapped - origin) / grid_size).astype(int)
 
             # Increment the density in the corresponding grid cells (one for each atom within the voxel)
             # Mask to avoid out of bounds errors           
