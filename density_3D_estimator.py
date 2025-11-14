@@ -6,11 +6,11 @@ from MDAnalysis.analysis import align
 
 # %%
 
-class Density3D():
+class Volmap3D():
     def __init__(self, u):
         self.u = u
 
-    def align_trajectories(self, sel, ref_frame=0, in_memory=True, weights=None):
+    def align_trajectories(self, sel, ref_frame=0, in_memory=True, weights=None, ref_external=None):
         """Align the trajectory based on a selection.
 
         Args:
@@ -24,6 +24,9 @@ class Density3D():
         ref = self.u.copy()  # independent Universe with identical topology & coords
         ref.trajectory[ref_frame]  # fix the reference at the chosen frame
 
+        if ref_external is not None:
+            ref = md.Universe(ref_external)
+
         # Set up the aligner. If `outfile` is given, MDAnalysis will write as it goes.
         aligner = align.AlignTraj(
             self.u,
@@ -34,6 +37,7 @@ class Density3D():
         )
 
         aligner.run()
+
 
     def generate_grid(self, grid_size=0.5):
         """Generate a 3D grid for density estimation.
@@ -163,26 +167,30 @@ class Density3D():
         with md.Writer(outfile, self.u.atoms.n_atoms) as W:
             W.write(self.u.atoms)
 
-    def calculate_and_save_density(self, center_sel, ligand_sel, grid_size=0.5, dx_out="density.dx", gro_out="aligned_frame.gro"):
+
+    def calculate_and_save_density(self, center_sel, ligand_sel, grid_size=0.5, dx_out="density.dx", gro_out="aligned_frame.gro", ref_external=None):
         """Calculate the 3D density of a ligand selection around a center selection,
         and save the density grid to a .dx file and an aligned frame to a .gro file.
         Args:
             center_sel (str): Selection string for atoms to align.
             ligand_sel (str or AtomGroup): Selection string or AtomGroup for the ligand.
             grid_size (float, optional): Size of the grid cells (voxels). Defaults to 0.5.
+            ref_external (str, optional): Path to an external reference structure for alignment. Defaults to None.
             dx_out (str, optional): Output .dx file path. Defaults to "density.dx".
             gro_out (str, optional): Output .gro file path. Defaults to "aligned_frame.gro".
         """
         print(f"Aligning trajectory to {center_sel}...")
-        self.align_trajectories(center_sel)
+        self.align_trajectories(center_sel, ref_external=ref_external)
         self.generate_grid(grid_size)
         print(f"Computing density for ligands ...")
         self.compute_density(ligand_sel, grid_size)
         self.normalize_density()
         print(f"Writing density to {dx_out}...")
         self.write_dx(dx_out)
-        print(f"Writing aligned frame to {gro_out}...")
-        self.write_gro(gro_out)
+        if ref_external is None:
+            print(f"Writing aligned frame to {gro_out}...")
+            self.write_gro(gro_out)
+
 
     def calculate_and_save_density_no_realign(self, ligand_sel, grid_size=0.5, dx_out="density.dx"):
         """Calculate the 3D density of a ligand selection without aligning, for speed purposes,
@@ -204,12 +212,13 @@ class Density3D():
 # Example usage:
 # Load your trajectory an create the object
 u = md.Universe('example/topol.gro', 'example/traj.xtc')
-density_estimator = Density3D(u)
+density_estimator = Volmap3D(u)
 
 # Calculate and save the density
 # center_sel: selection for alignment (e.g., protein CA atoms)
 # ligand_sel: selection for density calculation (e.g., all non-protein atoms)
 # grid_size: size of the grid cells in Å - smaller, finer grid, more resolution, but slower
+# ref_external: Can be used to provide an external file for alignement, so the trajectory is aligned to it
 # dx_out: output .dx file for density
 # gro_out: output .gro file for an aligned frame to overlay the density
 
@@ -217,6 +226,7 @@ density_estimator.calculate_and_save_density(
     center_sel='protein and name CA',
     ligand_sel='not protein',
     grid_size=1,
+    ref_external=None,
     dx_out='example/density.dx',
     gro_out='example/aligned_frame.gro'
 )
