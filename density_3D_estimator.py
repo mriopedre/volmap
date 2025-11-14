@@ -18,6 +18,7 @@ class Volmap3D():
             ref_frame (int, optional): Frame to use as reference. Defaults to 0 (first frame).
             in_memory (bool, optional): If True, keep all frames in memory. Defaults to True.
             weights (array-like, optional): Weights for the alignment. Defaults to None.
+            ref_external (str, optional): Path to an external reference structure for alignment. Defaults to None.
         """
         # Align trajectories based on a selection
 
