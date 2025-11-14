@@ -14,12 +14,13 @@ Requires MDAnalysis, tqdm and numpy
 # Example usage:
 # Load your trajectory an create the object
 u = md.Universe('example/topol.gro', 'example/traj.xtc')
-density_estimator = Density3D(u)
+density_estimator = Volmap3D(u)
 
 # Calculate and save the density
 # center_sel: selection for alignment (e.g., protein CA atoms)
 # ligand_sel: selection for density calculation (e.g., all non-protein atoms)
 # grid_size: size of the grid cells in Å - smaller, finer grid, more resolution, but slower
+# ref_external: Can be used to provide an external file for alignement, so the trajectory is aligned to it
 # dx_out: output .dx file for density
 # gro_out: output .gro file for an aligned frame to overlay the density
 
@@ -27,9 +28,11 @@ density_estimator.calculate_and_save_density(
     center_sel='protein and name CA',
     ligand_sel='not protein',
     grid_size=1,
+    ref_external=None,
     dx_out='example/density.dx',
     gro_out='example/aligned_frame.gro'
 )
+
 ```
 
 # Using the output
